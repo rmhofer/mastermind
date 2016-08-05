@@ -1,4 +1,4 @@
-# mastermind
+# Mastermind Project 
 
 ### Requirements
 
