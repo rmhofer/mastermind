@@ -12,7 +12,11 @@ The application requires the following python modules to run:
 **mmind-app.py** is a GUI-based application to play the Mastermind game in 
 the code jar variation (composition of code jar from which code will be 
 selected at random can be determined by the player, i.e., number of 
-different colors and relative frequency).
+different colors and relative frequency). [See screenshot]
+
+![screenshot][logo]
+
+[logo]: img/ss.png "game screenshot"
 
 Besides playing the game oneself it is also posible to watch the computer
 play the game using different strategies. Among them are:
