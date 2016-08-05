@@ -61,7 +61,7 @@ class Game:
 		return self.currentFS
 
 	#----------------------------------------------------------------------
-	def viscodejar(self, ax=None):
+	def viscodejar(self, ax=None): #requires matplotlib and seaborn
 		if ax == None: f, ax = plt.subplots(1)
 		sns.barplot(np.arange(self.Ncolors), self.codejar, palette="Set3", ax=ax)
 		plt.show()
@@ -80,7 +80,7 @@ class Game:
 		return sharma_mittal.sm_entropy(probs, t=t, r=r)
 
 	#----------------------------------------------------------------------
-	def visualize_query(self, c, feasible_set, ax=None):
+	def visualize_query(self, c, feasible_set, ax=None): #requires matplotlib and seaborn
 		if ax == None: f, ax = plt.subplots()
 		cmap = sns.cubehelix_palette(8, start=.5, rot=-.75, 
 			light=.98, as_cmap=True, reverse=True)
