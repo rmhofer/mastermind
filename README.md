@@ -18,10 +18,17 @@ different colors and relative frequency). [See screenshot]
 
 [logo]: img/ss.png "game screenshot"
 
-Besides playing the game oneself it is also posible to watch the computer
-play the game using different strategies. Among them are:
-* random
-* Sharma-Mittal
+Besides playing the game oneself (human plater) it is also posible to watch 
+the computer play the game using different strategies. Among them are:
+* random feasible (generate codes at random and use the first code that
+is feasible)
+* Donald Knuth's algorithm
+* pure probability (pick the code the has the highest probability of
+being the hidden code)
+* pure information gain (pick the code the has the highest expected information
+* gain under an entropy function instantiated through the specified oder-degree pair)
+* mixed strategy (use mix parameter between 0 and 1 to determine influence of 
+probability component and information gain component in strategy selection)
 
 Functionality of the Mastermind App:
 * 'New' (start a new game after specifying game setup, i.e., code length, 
