@@ -1,3 +1,10 @@
+"""
+    mmind_app.py
+
+    This module is the main GUI-based app to play mastermind
+    and watch the computer play various strategies.
+"""
+
 import wx
 import wx.grid as gridlib
 import numpy as np
@@ -5,11 +12,14 @@ import mastermind
 
 ########################################################################
 class StartPanel(wx.Panel):
-    """"""
+    """
+        Panel class for the start panel that is displayed first
+        upon opening the game
+    """
 
     #----------------------------------------------------------------------
     def __init__(self, parent):
-        """Constructor"""
+        """ Constructor creates the panel and displays some text """
         wx.Panel.__init__(self, parent=parent)
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         newGameTxt = wx.StaticText(self, label="Welcome to Mastermind!" \
@@ -21,7 +31,7 @@ class StartPanel(wx.Panel):
         
 ########################################################################
 class NewGame(wx.Panel):
-    """"""
+    """ New game panel to set up a new mastermind game """
 
     #----------------------------------------------------------------------
     def __init__(self, parent):
@@ -38,7 +48,7 @@ class NewGame(wx.Panel):
         mainSizer.Add(newGameTxt, flag=wx.LEFT|wx.TOP, border=10)
         mainSizer.Add((-1, 10))
 
-        #(1) INPUT FIELDS
+        #------- INPUT FIELDS
         iptbox = wx.BoxSizer(wx.HORIZONTAL)
         iptlabel = wx.StaticText(self, label="Code length:")
         self.clengthfield = wx.TextCtrl(self, value="3", size=(50, 25))
@@ -47,7 +57,7 @@ class NewGame(wx.Panel):
         iptbox.Add(self.clengthfield, flag=wx.LEFT|wx.RIGHT, border=10)
         mainSizer.Add(iptbox, flag=wx.LEFT|wx.RIGHT|wx.TOP, border=10)
 
-        #(2) PEGBOX
+        #------- PEGBOX FOR CODE JAR
         pegbox = wx.BoxSizer(wx.HORIZONTAL)
         nPegs = 8
         fgs = wx.FlexGridSizer(2, nPegs, 5, 5)
@@ -68,7 +78,7 @@ class NewGame(wx.Panel):
         mainSizer.Add(pegbox, flag=wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 
             border=10)
 
-        #------- select agent
+        #------- SELECT PLAYING AGENT AND STRATEGY
         mainSizer.Add((-1, 20))
         agenttxt = wx.StaticText(self, label="Select Agent:")
         mainSizer.Add(agenttxt, flag=wx.LEFT, border=10)
@@ -97,7 +107,7 @@ class NewGame(wx.Panel):
         SM_param.Add(self.orderIpt)
         mainSizer.Add(SM_param, flag=wx.LEFT, border=27)
 
-        #trade-off
+        #trade-off parameter
         mainSizer.Add((-1, 6))
         mix_param = wx.BoxSizer(wx.HORIZONTAL)
         mixTxt = wx.StaticText(self, label="--> mix parameter:")
@@ -120,7 +130,7 @@ class NewGame(wx.Panel):
 
 ########################################################################
 class PlayGame(wx.Panel):
-    """""" 
+    """ Main game panel where the game is played via drag-and-drop """ 
 
     #----------------------------------------------------------------------
     def __init__(self, parent, **kwargs):
@@ -135,8 +145,7 @@ class PlayGame(wx.Panel):
         self.game = mastermind.Game(**kwargs)
         self.game.initialize()
 
-
-        #-------- determine mode
+        #-------- determine mode (human or AI?)
         if not kwargs['mode']==0:
             print "Computer player"
             self.human_player = False
@@ -176,8 +185,7 @@ class PlayGame(wx.Panel):
         fgs.AddMany(self.pegsbgrd)
         contentSizer.Add(fgs, proportion=1, 
             flag=wx.LEFT, border=0)
-        
-        # contentSizer.Add((6, -1))
+    
         ln = wx.StaticLine(self, -1, style=wx.LI_VERTICAL, size=(5,230))
         contentSizer.Add((6, -1))
         contentSizer.Add(ln, flag=wx.TOP)
@@ -226,7 +234,7 @@ class PlayGame(wx.Panel):
     
     #----------------------------------------------------------------------
     def UpdateStatistics(self):
-        #check if stats window is open!
+        #first check if stats window is already open!
         if not self.parent.statsFrame.IsShown():
             return
         if self.parent.statsFrame.step != self.game.step:
@@ -234,7 +242,6 @@ class PlayGame(wx.Panel):
             pos, col, misc = self.game.compute_console_statistics()
             self.parent.statsFrame.UpdateStats(pos, col, misc)
             self.parent.statsFrame.step = self.game.step
-
 
     def MakeGuess(self, event):
         guessbtn = event.GetEventObject()
@@ -336,6 +343,8 @@ class PlayGame(wx.Panel):
                 newPositionX = self.GetPosition()[0] + deltaX
                 newPositionY = self.GetPosition()[1] + deltaY
 
+                # snippet can be used to prevent marbles from 
+                # being dragged out of the panel window
                 # if (0 < newPositionX < self.maxPiecePositionX) and 
                 #   (0 < newPositionY < self.maxPiecePositionY):
                 #     self.SetPosition((newPositionX, newPositionY))
@@ -349,10 +358,13 @@ class PlayGame(wx.Panel):
 
 ########################################################################
 class StatsApp(wx.Frame):
+    """
+        Statistics Widget: Used to initialize computation and 
+        visualization of game statistics
+    """
 
     class PositionStats(wx.Panel):
-        """""" 
-        #---------------------------------- panel for position info
+        """ This panel is for the position statistics """ 
         def __init__(self, parent, **kwargs):
             """Constructor"""
             wx.Panel.__init__(self, parent=parent)
@@ -360,7 +372,6 @@ class StatsApp(wx.Frame):
             Ncolors = self.parent.gamePanel.game.Ncolors
             codelength = self.parent.gamePanel.game.codelength
             
-            # self.SetBackgroundColour('#4f5049')
             posSizer = wx.BoxSizer(wx.VERTICAL)
             font = wx.Font(pointSize=16, weight=wx.BOLD, style=wx.NORMAL,
                 family=wx.SYS_SYSTEM_FONT)
@@ -389,15 +400,13 @@ class StatsApp(wx.Frame):
                 img, size=(img.GetWidth(), img.GetHeight()))
 
             posGrid.AddMany(self.posCont.flatten())
-
             posSizer.Add(posGrid, proportion=1, 
                 flag=wx.ALL | wx.EXPAND, border=5)
             self.SetSizer(posSizer)
 
 
     class ColorStats(wx.Panel):
-        """""" 
-        #---------------------------------- panel for color info
+        """ This panel is for the color statistics """ 
         def __init__(self, parent, **kwargs):
             """Constructor"""
             wx.Panel.__init__(self, parent=parent)
@@ -438,8 +447,7 @@ class StatsApp(wx.Frame):
             self.SetSizer(colSizer)
 
     class FeasibleSetStats(wx.Panel):
-        """""" 
-        #---------------------------------- panel for feasible set info
+        """ This panel is for information about the feasible set """ 
         def __init__(self, parent, **kwargs):
             """Constructor"""
             wx.Panel.__init__(self, parent=parent)
@@ -486,9 +494,9 @@ class StatsApp(wx.Frame):
                 flag=wx.ALL | wx.EXPAND, border=5)
             self.SetSizer(fsSizer)
 
-    # StatsApp main constructor
     #----------------------------------------------------------------------
     def __init__(self, *args, **kwargs):
+        """ This is the main CONSTRUCTOR for the stats panel """
         super(StatsApp, self).__init__(
             style=wx.SYSTEM_MENU | wx.CAPTION, 
             title='Game Statistics',
@@ -497,11 +505,13 @@ class StatsApp(wx.Frame):
         self.parent = args[0]
 
     def Redraw(self):
+        """ Needs to be called after panel is updated """
         if self.IsShown():
             self.Hide()
             self.Show()
 
     def ResetStats(self):
+        """ Reset statistics for new game """
         self.step = -1
         if hasattr(self, 'mainSizer'):
             self.mainSizer.Clear(True)
@@ -516,6 +526,7 @@ class StatsApp(wx.Frame):
         self.Layout()
 
     def InitializeStats(self, panel):
+        """ Initialize statistics if first called """
         self.gamePanel = panel
         self.mainSizer.Clear(True)
         self.positionPanel = self.PositionStats(self)
@@ -530,6 +541,7 @@ class StatsApp(wx.Frame):
         self.Layout()
         
     def UpdateStats(self, pos, col, misc):
+        """ Update statistics as the game unfolds """
         #--------- update position stats
         itidx = self.positionPanel.posCont.shape
         for i in np.arange(itidx[0]-1):
@@ -566,9 +578,13 @@ class StatsApp(wx.Frame):
 
 ########################################################################
 class MMindApp(wx.Frame):
-
+    """ 
+        Main application class controlling creating and 
+        switching between the different panels (above) 
+    """
     #----------------------------------------------------------------------
     def __init__(self, *args, **kwargs):
+        """ CONSTRUCTOR """
         super(MMindApp, self).__init__(
             style=wx.SYSTEM_MENU | wx.CAPTION |  wx.CLOSE_BOX, 
             title='Mastermind',
@@ -577,7 +593,7 @@ class MMindApp(wx.Frame):
         self.SetSize((400, 600))
         self.SetPosition((50,50))
 
-        #----------- toolbar
+        #----------- top toolbar
         self.toolbar = self.CreateToolBar(style=wx.TB_TEXT)
         newtool = self.toolbar.AddLabelTool( wx.ID_ANY, 'New', 
             wx.Bitmap('icons/stock_new.png'))
@@ -590,15 +606,12 @@ class MMindApp(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.toggleStats, statstool)
         self.Bind(wx.EVT_TOOL, self.OnQuit, quittool)
 
-        #----------- panels
+        #----------- create panels
         self.start_panel = StartPanel(self)
         self.new_game_panel = NewGame(self)
         self.new_game_panel.Hide()
-        
         self.activePanel = self.start_panel
-
         self.statsFrame = StatsApp(self)
-
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.start_panel, 1, wx.EXPAND)
         self.sizer.Add(self.new_game_panel, 1, wx.EXPAND)
@@ -607,17 +620,16 @@ class MMindApp(wx.Frame):
 
     #----------------------------------------------------------------------
     def toggleStats(self, event):
-        """"""
+        """ toggle the statistics window """
         if self.statsFrame.IsShown() or self.statsFrame.IsShownOnScreen():
             self.statsFrame.Hide()
         else:
             self.statsFrame.Show()
             if self.activePanel == self.play_game_panel:
                 self.play_game_panel.UpdateStatistics()
-            #compute statistics?
 
     def loadNewGamePanel(self, event):
-        """"""
+        """ open create new game panel """
         self.activePanel.Hide()
         self.activePanel = self.new_game_panel
         self.new_game_panel.Show()
@@ -625,6 +637,10 @@ class MMindApp(wx.Frame):
         self.Layout()
 
     def createNewGame(self, event):
+        """ 
+            executed once player clicked on 'create game' 
+            used to pass on data to mastermind.py 
+        """
         code_jar = [int(tc.GetValue())
             for tc in self.new_game_panel.pegtc]
         codelength = self.new_game_panel.clengthfield.GetValue()
@@ -649,11 +665,12 @@ class MMindApp(wx.Frame):
         self.Layout()
 
     def OnQuit(self, e):
+        """ close on quit """
         self.Close()
 
-# Run the program
-if __name__ == "__main__":
 
+""" If executed as main, run the following code: """
+if __name__ == "__main__":
     app = wx.App()
     MMindApp(None)
     app.MainLoop()

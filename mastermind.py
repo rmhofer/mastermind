@@ -1,29 +1,46 @@
-#Mastermind.py
+"""
+	mastermind.py
+
+	This is the python module that provides the main (backbone)
+	funcitonality, i.e., the program logics, for the mastermind
+	GUI-based application
+
+	It can also be used to run simulations independently of 
+	using the GUI (see blow)
+
+"""
+
 from __future__ import division
 import numpy as np
 import sharma_mittal
-# import seaborn as sns
-# import matplotlib.pyplot as plt
 from fractions import Fraction
+
+
+"""
+	Part one: the game
+
+	Simply consists of functions to play the mastermind game
+	in the code jar variation
+"""
+
 
 ########################################################################
 class Game:
-	'''
+	"""
+		Main game class. Creat an instance and initialize various
+		attribues (e.g., code length, code jar). Can be used 
+		repeatedly to play several mastermind games 
 
-	'''
+	"""
 	#----------------------------------------------------------------------
 	def __init__(self, **kwargs):
-		''' A Mastermind problem is characterized by codelength
-			and number of colors
-
-			### Attributes
-			- codelength: number of pegs
-			- codejar: pass on frequency list to sample code from 
-						codejar
-			- maxguess: maximum number of guesses
-
-		'''
-
+		"""
+			The attributes are:
+			- logging: if logging output in the console is wanted
+			- codelength: number of pegs/marbles
+			- codejar: pass on frequency list that code is sampled from
+			- maxguess: maximum number of guesses before game ends
+		"""
 		self.colors = []
 		self.logging = kwargs.get('logging', False)
 		self.codelength = int(kwargs.get('codelength', 4))
@@ -37,6 +54,7 @@ class Game:
 	
 	#----------------------------------------------------------------------
 	def initialize(self, **kwargs):
+		""" Initialize game and compute set of all feasible codes """
 		self.code = kwargs.get('code', False) #check if valid
 		if not self.code:
 			self.code = np.random.choice(
@@ -55,13 +73,27 @@ class Game:
 	
 	#----------------------------------------------------------------------	
 	def getCurrentFS(self):
+		""" 
+			function returns the current feasible set
+			array is either read out from memory if it exists, or updated
+			first and then returned if it is not up to date
+
+		"""
 		if self.currentFS[2] != self.step:
 			uFS = self.update_feasible_set(self.currentFS[0])
 			self.currentFS = np.array([uFS, self.fs_probability(uFS), self.step])
 		return self.currentFS
 
 	#----------------------------------------------------------------------
-	def viscodejar(self, ax=None): #requires matplotlib and seaborn
+	def viscodejar(self, ax=None):
+		"""
+			Visualize the codejar as a historgram
+
+			If used, add the following lines to program preamble:
+	 		- import seaborn as sns
+			- import matplotlib.pyplot as plt
+		"""
+
 		if ax == None: f, ax = plt.subplots(1)
 		sns.barplot(np.arange(self.Ncolors), self.codejar, palette="Set3", ax=ax)
 		plt.show()
@@ -69,6 +101,8 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def fs_probability(self, fs):
+		""" returns probability of all items in the feasible set """
+
 		probs = []
 		for c in fs: probs.append(self.get_probability(c))
 		probs /= np.sum(probs)
@@ -76,11 +110,22 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def fs_entropy(self, fs, t, r):
+		""" returns Sharma-Mittal entropy of feasible """
+
 		probs = self.fs_probability(fs)
 		return sharma_mittal.sm_entropy(probs, t=t, r=r)
 
 	#----------------------------------------------------------------------
-	def visualize_query(self, c, feasible_set, ax=None): #requires matplotlib and seaborn
+	def visualize_query(self, c, feasible_set, ax=None):
+		"""
+			Heatmap to show information gain for a specific query 
+			across the Sharma-Mittal space
+
+			If used, add the following lines to program preamble:
+	 		- import seaborn as sns
+			- import matplotlib.pyplot as plt
+		"""
+
 		if ax == None: f, ax = plt.subplots()
 		cmap = sns.cubehelix_palette(8, start=.5, rot=-.75, 
 			light=.98, as_cmap=True, reverse=True)
@@ -109,6 +154,12 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def compute_console_statistics(self):
+		"""
+			Funciton to compute (position/color/feasible set) statistics
+			used by the MMind_App. The statistics are displayed in the
+			statistics widget
+		"""
+
 		self.getCurrentFS()
 
 		#------ compute position statistics
@@ -137,17 +188,19 @@ class Game:
 		topC = self.currentFS[0][topIDX][::-1]
 		topP = self.currentFS[1][topIDX][::-1]
 		fs_stats = [fs_size, fs_entropy, topC, topP]
-		# 
+
 		return [position_statistics, color_statistics, fs_stats]
 		
 
 	#----------------------------------------------------------------------
 	def partition(self, feasible_set):
-		''' compute partition matrix for feasible set. 
+		''' 
+			compute partition matrix for feasible set. 
 			The information in the matrix can be considered
 			a lookahead table, but is expensive to compute and 
 			requires the feasible set!
 		'''
+
 		partition_matrix = np.zeros(shape=(len(feasible_set),
 			self.codelength+1,self.codelength+1))
 		for i, c_i in enumerate(feasible_set):
@@ -157,12 +210,15 @@ class Game:
 				w = r['color']
 				partition_matrix[i][b][w] += 1 
 				partition_matrix[j][b][w] += 1 
-		# print partition_matrix[::]
 		return partition_matrix
 
 	#----------------------------------------------------------------------
 	def get_probability(self, combination):
-		#probability that an item is the hidden code!
+		""" 
+			return the probability that 'combination' 
+			is the hidden code 
+		"""
+
 		prob = 1
 		for i in np.arange(self.codelength):
 			prob *= self.prior[combination[i]-1]
@@ -170,13 +226,16 @@ class Game:
 	
 	#----------------------------------------------------------------------
 	def get_random(self):
-		''' function to generate a random combination '''
+		""" use this funciton to generate a random combination """
+
 		return np.random.choice(
 				self.Ncolors, size=self.codelength, 
 				replace=True, p=self.prior) + 1
 
 	#----------------------------------------------------------------------
 	def update_feasible_set(self, feasible_set):
+		""" update feasible set if called """
+
 		new_feasible_set = np.zeros((0, self.codelength),dtype=int)
 		for combination in feasible_set:
 			if self.feasible(combination):
@@ -185,6 +244,7 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def get_feasible_set(self):
+		""" function to compute the feasible set (initially) """
 		feasible_set = np.zeros((0, self.codelength),dtype=int)
 		for index, x in np.ndenumerate(
 			np.empty(shape=[self.Ncolors] * self.codelength)):
@@ -195,14 +255,16 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def consistent(self, c, combination):
-		''' the true code is a subset of all consistent combinations '''
+		""" check consistency of two combinations passed as arguments """		
 		return (self.response(c, combination) 
 			== self.response(combination, self.code))
 
 	#----------------------------------------------------------------------
 	def feasible(self, c):
-		''' a combinaiton is feasible if it is consistent with all 
-			combinations played so far '''
+		""" 
+			a combinaiton is feasible if it is consistent with all 
+			combinations played so far 
+		"""
 		for played_combination in self.combinations:
 			if not self.consistent(c, played_combination):
 				return False
@@ -210,7 +272,11 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def evaluate_combination(self, target, feasible_set, t, r, logging=False):
-		#target: combination to be evaluated
+		"""
+			return expected information gain of target combination (target)
+			for a specific degree-order pair
+
+		"""
 		if logging: print "\n### Evaluating combination: ", target
 		collected_responses = []
 		probabilities = np.zeros(self.codelength**2)
@@ -245,7 +311,12 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def best_combination(self, feasible_set, t, r):
-		#compute information gain of all combinations in the codepool:
+		""" 
+			find combination with highest expected information
+			gain (for specific degree-order pair) in the entire
+			code pool (all possible codes)
+		"""
+
 		evaluations = [self.evaluate_combination(combination, 
 			feasible_set, t, r) for combination in self.codepool]
 		idx = np.argwhere(evaluations == np.amax(evaluations))
@@ -258,7 +329,9 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def best_mixes(self, t, r, p):
-		#check if p is between 0 and 1!!!
+		"""
+			return the best 'mixed' combination
+		"""
 		evaluations = np.array([self.evaluate_combination(combination, 
 			self.currentFS[0], t, r) for combination in self.codepool])
 		evaluations *= float(1.0-p)
@@ -283,7 +356,10 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def response(self, combination, code):
-		''' simulate a response given a combinationb and a(!) true code '''
+		""" 
+			simulate response for combination 'combination' if 
+			'code' were the true hidden code
+		"""
 		if (not len(combination) == self.codelength or 
 			not (np.array(combination) <= self.Ncolors).all()):
 			raise ValueError('Combination not valid!')
@@ -303,6 +379,9 @@ class Game:
 
 	#----------------------------------------------------------------------
 	def guess(self, combination):
+		"""
+			guess combination (combination) and return feedback
+		"""
 		feedback = self.response(combination, self.code)
 		combination = np.array(combination)
 		self.combinations = np.vstack((
@@ -319,63 +398,32 @@ class Game:
 			if self.logging: print "+---------+---------+\n\n\n"
 		return feedback
 
-'''
-class AutomatizedPlayAgent():
-	def __init__(self, **kwargs):
-		self.game = Game(**kwargs)
-		self.args = kwargs
-	def random_play(self):
-		# random search 
-		g = self.game
-		g.initialize(**self.args)
 
-		while not g.end:
-			c = 0
-			while True:
-				c = g.get_random()
-				if g.feasible(c): break
-			f = g.guess(c)
-		return g.step
-	
-	def knuth_play(self):
-		# pick based on partition matrix
-		g = self.game
-		g.initialize(**self.args)
-		g.guess(g.get_random())
 
-		while not g.end:
-			fs = g.get_feasible_set()
-			pa = g.partition(fs)
-			idx = np.argmin([np.max(pa[i,:]) 
-				for i in np.arange(fs.shape[0])])
-			# idx = np.unravel_index(pa.argmax(), pa.shape)[0]
-			c = np.array(fs[idx], dtype=int)
-			f = g.guess(c)
-		return g.step
 
-	def entropy_play(self, t, r):
-		g = self.game
-		g.initialize(**self.args)
-		fs = g.codepool
-		while not g.end:
-			if fs.shape[0]<=2:
-				probabilities = [g.get_probability(c) for c in fs]
-				f = g.guess(fs[np.argmax(probabilities)])
-			else:
-				bc = g.best_combination(fs, t=t, r=r)
-				f = g.guess(bc[np.random.randint(bc.shape[0])])
-			fs = g.update_feasible_set(fs)
-			# fs = g.get_feasible_set()
-		return g.step
-'''
+"""
+	Part two: playing agents
+
+	Consists of functions for artificial agents to play the
+	game using different stratgies
+"""
+
 
 ########################################################################
 class AppAgent():
-	''' 
-
-	'''
+	""" 
+		Create an AppAgent instance and choose which 
+		strategy it should follow
+	"""
 	#----------------------------------------------------------------------
 	def __init__(self, **kwargs):
+		"""	
+			- use an already existing game by passing on a GAME instance
+				for game
+			- mode, an integer, determines which strategy is used 
+				(see below)
+			- r, t for Sharma-Mittal, p is the mixing parameter
+		"""
 		self.game = kwargs.get('game', False)
 		self.mode = kwargs.get('mode', 1)
 		self.r = kwargs.get('r', 1)
@@ -398,7 +446,8 @@ class AppAgent():
 		self.strategy = stratDict[self.mode]
 		self.fs = []
 
-	def compute_guess(self):	
+	def compute_guess(self):
+		""" perform a guess given the strategy chosen for the agent """
 		return self.strategy()
 
 	#mode = 1: random play
@@ -412,6 +461,9 @@ class AppAgent():
 	#mode = 2: knuth play
 	#----------------------------------------------------------------------
 	def knuth_play(self):
+		"""
+			Attention: not yet implemented!!!
+		"""
 		return self.game.get_random()
 
 	#mode = 3: select most probable
@@ -449,6 +501,8 @@ class AppAgent():
 		else:
 			return cs
 		
+	#mode = 5: mixed strategy
+	#----------------------------------------------------------------------
 	def mixed_strategy(self):
 		self.game.getCurrentFS()
 		cs = self.game.best_mixes(t=self.t, r=self.r, p=self.p)
@@ -481,43 +535,10 @@ class AppAgent():
 		# 	return bc[np.random.randint(bc.shape[0])]
 
 
-
-# dist1 = [0.5, 0.3, 0.1, 0.05, 0.025, 0.025]
-# dist2 = [0.5, 0.1, 0.1, 0.1, 0.1, 0.1]
-# dist3 = [0.4, 0.4, 0.2]
-# dist = [dist1, dist2, dist3]
-
-# #1 = shannon
-# #2 = prob gain
-# rarr = [1,5,2]
-# tarr = [1,1.8,2]
-
-# for r,t in zip(rarr, tarr):
-# 	ent = [sharma_mittal.sm_entropy(d, r=r, t=t) for d in dist]
-# 	print np.array(ent)
-
-
-# d = [0.94, 0.06]
-# d = [0.63, 0.27, 0.1]
-# d = [0.37, 0.41, 0.22]
-# d = [0.50, 0.50]
-# d = [0.88, 0.12]
-d = [0.0, 0.0]
-print sharma_mittal.sm_entropy(d, r=1.0, t=1.0)
-
-
-
-# r=1.0
-# t=1.0
-# print sharma_mittal.sm_entropy([0.5, 0.1, 0.1, 0.1, 0.1, 0.1], r=r, t=t)
-# print sharma_mittal.sm_entropy([0.4, 0.3, 0.2, 0.1], r=r, t=t)
-
-
-# print np.random.choice(4, size=4, replace=True, p=[0.4, 0.3, 0.2, 0.1])
-
-###############
-# # GAME
-# ###############
+"""
+########################
+# # CODE FOR TESTING
+# ######################
 # game = Game(codelength=3, codejar=[8,6,6,2], logging=True)
 # game.initialize()
 # game.guess(combination = [1,3,2])
@@ -527,32 +548,4 @@ print sharma_mittal.sm_entropy(d, r=1.0, t=1.0)
 # print agent.compute_guess()
 
 # game.compute_console_statistics()
-
-
-# fs = game.get_feasible_set()		
-
-# print p
-
-# game.visualize_query([1,1,4], fs, ax=None)
-
-# # game.viscodejar()
-# 			#initialize game
-# # game.guess(combination = [1,1,2,3])	#make first guess
-# # game.guess(combination = [3,4,4,4])	#make first guess
-
-# bc = game.best_combination(fs, t=1, r=1)
-# print bc[np.random.randint(bc.shape[0])]
-
-# print game.evaluate_combination([2,4,2], fs, t=1, r=1)
-# print game.evaluate_combination([1,2,3], fs, t=1, r=1)
-# print game.evaluate_combination([1,2,2,4], fs, t=1, r=1)
-# print game.evaluate_combination([2,4,3,4], fs, t=1, r=1)
-
-###############
-# AGENT
-###############
-# a = Agent(codelength=3, codejar=[1,1,1,1], logging=True)
-
-# a.entropy_play(r=128, t=2)
-# a.entropy_play(r=1, t=1)
-# a.entropy_play(r=5, t=1.8)
+"""
