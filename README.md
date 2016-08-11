@@ -1,5 +1,6 @@
 # Mastermind 
-## Part of 'Entropy-based Approaches to Mastermind'
+#### Part of 'Entropy-based Approaches to Mastermind'
+
 
 ### Short project description 
 
