@@ -18,7 +18,7 @@ different colors and relative frequency). [See screenshot]
 
 [logo]: img/ss.png "game screenshot"
 
-Besides playing the game oneself (human plater) it is also posible to watch 
+Besides playing the game (human player) it is also possible to watch 
 the computer play the game using different strategies. Among them are:
 * random feasible (generate codes at random and use the first code that
 is feasible)
