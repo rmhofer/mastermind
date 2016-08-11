@@ -1,4 +1,5 @@
-# Mastermind App (Part of Project: Entropy-based Approaches to Mastermind)
+# Mastermind 
+## Part of 'Entropy-based Approaches to Mastermind'
 
 ### Short project description 
 
