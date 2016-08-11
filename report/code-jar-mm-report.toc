@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}The Mastermind Game}{2}
+\contentsline {subsection}{\numberline {1.1}Standard version}{2}
+\contentsline {subsection}{\numberline {1.2}Code jar version}{3}
+\contentsline {section}{\numberline {2}Important concepts}{3}
+\contentsline {subsection}{\numberline {2.1}Consistency}{3}
+\contentsline {subsection}{\numberline {2.2}Feasibility and the feasible set}{4}
+\contentsline {section}{\numberline {3}Determining the usefulness of a combination}{4}
+\contentsline {subsection}{\numberline {3.1}Graphical intuition}{4}
+\contentsline {subsection}{\numberline {3.2}Formal treatment}{5}
+\contentsline {subsubsection}{\numberline {3.2.1}Probability of feedback}{6}
+\contentsline {subsubsection}{\numberline {3.2.2}Determining hypothetical feasible sets}{6}
+\contentsline {subsubsection}{\numberline {3.2.3}Sharma-Mittal generalized entropy}{6}
