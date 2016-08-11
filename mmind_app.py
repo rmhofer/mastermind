@@ -86,10 +86,9 @@ class NewGame(wx.Panel):
         self.rbtns.append(wx.RadioButton(self, -1, 'no agent (human player)', #0
             style=wx.RB_GROUP))
         self.rbtns.append(wx.RadioButton(self, -1, 'random feasible'))  #1
-        self.rbtns.append(wx.RadioButton(self, -1, 'knuth\'s algorithm')) #2
-        self.rbtns.append(wx.RadioButton(self, -1, 'pure probability')) #3
-        self.rbtns.append(wx.RadioButton(self, -1, 'pure information gain')) #4
-        self.rbtns.append(wx.RadioButton(self, -1, 'mixed strategy')) #5
+        self.rbtns.append(wx.RadioButton(self, -1, 'pure probability')) #2
+        self.rbtns.append(wx.RadioButton(self, -1, 'pure information gain')) #3
+        self.rbtns.append(wx.RadioButton(self, -1, 'mixed strategy')) #4
         
         for btn in self.rbtns: mainSizer.Add(btn, flag=wx.LEFT, border=10)
         self.rbtns[0].SetValue(True)

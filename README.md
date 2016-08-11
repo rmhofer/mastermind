@@ -22,7 +22,6 @@ Besides playing the game oneself (human plater) it is also posible to watch
 the computer play the game using different strategies. Among them are:
 * random feasible (generate codes at random and use the first code that
 is feasible)
-* Donald Knuth's algorithm
 * pure probability (pick the code the has the highest probability of
 being the hidden code)
 * pure information gain (pick the code the has the highest expected information
@@ -46,6 +45,7 @@ upon correctly guessing the code
 
 ## TODOs
 
+* strategies: choose random vs. choose lexicographic from equivalent combinations
 * integrate data saving functionalty
 * make game available online and collect data from human players
 * run simulation studies comparing various playing strategies under different 

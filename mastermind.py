@@ -319,7 +319,10 @@ class Game:
 
 		evaluations = [self.evaluate_combination(combination, 
 			feasible_set, t, r) for combination in self.codepool]
-		idx = np.argwhere(evaluations == np.amax(evaluations))
+
+		idx = np.argwhere(abs(evaluations - 
+			np.amax(evaluations)) <= 1e-10)
+
 		queries = self.codepool[idx.flatten()]
 		if self.logging:
 			print "\t --> u(best query for oder[r]=%s, degree[t]=%s): %.4f" % (
@@ -332,10 +335,11 @@ class Game:
 		"""
 			return the best 'mixed' combination
 		"""
+
 		evaluations = np.array([self.evaluate_combination(combination, 
 			self.currentFS[0], t, r) for combination in self.codepool])
-		evaluations *= float(1.0-p)
-		print "sclaed information: \n", np.array(evaluations)
+		evaluations *= 2 * float(1.0-p)
+		# print "scaled information: \n", np.array(evaluations)
 		
 		probArray = []
 		for combination in self.codepool:
@@ -344,13 +348,13 @@ class Game:
 			else:
 				probArray.append(0)
 		probArray = np.array(probArray) / np.sum(probArray)
-		probArray *= float(p)
+		probArray *= 2 * float(p)
+		# print "scaled probabilities \n", probArray
+		combined = np.add(evaluations, probArray)
+		# print "scaled combination\n", combined
 
-		print "scaled probabilities \n", probArray
-		combination = np.add(evaluations, probArray)
-		print "scaled combination\n", combination
-
-		idx = np.argwhere(combination == np.amax(combination))
+		idx = np.argwhere(abs(combined - 
+			np.amax(combined)) <= 1e-10)
 		queries = self.codepool[idx.flatten()]
 		return queries
 
@@ -400,7 +404,6 @@ class Game:
 
 
 
-
 """
 	Part two: playing agents
 
@@ -437,18 +440,23 @@ class AppAgent():
 		#dictionary with mode -> algorithm mappings
 		stratDict = {
 			1 : self.random_play,
-			2 : self.random_play,  #knuth_play
-			3 : self.pure_probability,
-			4 : self.pure_information_gain,
-			5 : self.mixed_strategy 
+			2 : self.pure_probability,
+			3 : self.pure_information_gain,
+			4 : self.mixed_strategy 
 		}
 
 		self.strategy = stratDict[self.mode]
 		self.fs = []
 
+	#----------------------------------------------------------------------
 	def compute_guess(self):
 		""" perform a guess given the strategy chosen for the agent """
 		return self.strategy()
+	
+	#----------------------------------------------------------------------
+	def play(self):
+		while game.end == False:
+			game.guess(combination=agent.compute_guess())
 
 	#mode = 1: random play
 	#----------------------------------------------------------------------
@@ -458,35 +466,17 @@ class AppAgent():
 			if self.game.feasible(c): break
 		return c
 
-	#mode = 2: knuth play
-	#----------------------------------------------------------------------
-	def knuth_play(self):
-		"""
-			Attention: not yet implemented!!!
-		"""
-		return self.game.get_random()
-
-	#mode = 3: select most probable
+	#mode = 2: select most probable
 	#----------------------------------------------------------------------
 	def pure_probability(self):
 		self.game.getCurrentFS()
-		'''
-		maxProbIDXs = np.argmax(self.game.currentFS[1]) #first occurence
-		maxProbIDXs = np.where(self.game.currentFS[1]==self.game.currentFS[1][maxProbIDXs])[0]
-	
-		#chose guess at random from set of max prob guesses
-		if len(maxProbIDXs) > 1:
-			return self.game.currentFS[0][maxProbIDXs[np.random.randint(len(maxProbIDXs))]]
-		else:
-			return self.game.currentFS[0][maxProbIDXs]
-		'''
+		### choose lexicographically ###
 
-		n = 5
-		topIDX = [np.argsort(self.game.currentFS[1])][0][-n:]
+		topIDX = [np.argsort(self.game.currentFS[1])][0]
 		topC = self.game.currentFS[0][topIDX][::-1]
 		return topC[0]
 
-	#mode = 4: sharma mittal
+	#mode = 3: sharma mittal
 	#----------------------------------------------------------------------
 	def pure_information_gain(self):
 		self.game.getCurrentFS()
@@ -501,12 +491,13 @@ class AppAgent():
 		else:
 			return cs
 		
-	#mode = 5: mixed strategy
+	#mode = 4: mixed strategy
 	#----------------------------------------------------------------------
 	def mixed_strategy(self):
 		self.game.getCurrentFS()
 		cs = self.game.best_mixes(t=self.t, r=self.r, p=self.p)
-		
+		print 
+
 		if len(cs) == 1:
 			return cs[0] 
 
@@ -519,33 +510,17 @@ class AppAgent():
 		else:
 			return cs
 
-		# probabilities = np.zeros(len(cs))
-		# for c in cs:
-		# 	for i, fs_c in enumerate(self.game.currentFS[0]):
-		# 		if list(c) == list(fs_c):
-		# 			print i
-		# 			print self.game.currentFS[1][i]
-			# print np.where(self.game.currentFS[0]==[c])
-		# print probabilities
-		# if self.fs.shape[0]<=2:
-		# 	probabilities = [self.game.get_probability(c) for c in self.fs]
-		# 	return self.fs[np.argmax(probabilities)]
-		# else:
-		# 	bc = self.game.best_combination(self.fs, t=t, r=r)
-		# 	return bc[np.random.randint(bc.shape[0])]
 
-
-"""
 ########################
 # # CODE FOR TESTING
 # ######################
-# game = Game(codelength=3, codejar=[8,6,6,2], logging=True)
+# game = Game(codelength=3, codejar=[8,6,4,2], logging=True)
 # game.initialize()
 # game.guess(combination = [1,3,2])
-# game.guess(combination = [4,1,2])
 
-# agent = AppAgent(game=game, mode=5)
-# print agent.compute_guess()
+# agent = AppAgent(game=game, mode=4)
+# agent.play()
 
+# guess = agent.compute_guess()
+# game.guess(combination=guess)
 # game.compute_console_statistics()
-"""
