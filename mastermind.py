@@ -279,7 +279,9 @@ class Game:
 		"""
 		if logging: print "\n### Evaluating combination: ", target
 		collected_responses = []
-		probabilities = np.zeros(self.codelength**2)
+		if self.codelength == 2: f_len = self.codelength**2 + 1
+		else: f_len = self.codelength**2
+		probabilities = np.zeros(f_len)
 		for combination in feasible_set:
 			response = self.response(target, combination)
 			probability = self.get_probability(combination)
@@ -516,11 +518,11 @@ class AppAgent():
 ########################
 # # CODE FOR TESTING
 # ######################
-# game = Game(codelength=3, codejar=[8,6,4,2], logging=True)
+# game = Game(codelength=2, codejar=[128,64,32,16,8,4,2,1], logging=True)
 # game.initialize()
 # game.guess(combination = [1,3,2])
 
-# agent = AppAgent(game=game, mode=4)
+# agent = AppAgent(game=game, mode=3, r=0.2, t=0.2)
 # agent.play()
 
 # guess = agent.compute_guess()

@@ -12,7 +12,7 @@ import mastermind
 import os
 
 """ The following code snippet corrects filepaths """
-app = True
+app = False
 filename, filetype = ([x.strip() 
     for x in os.path.basename(__file__).split('.')])
 if app==True:
