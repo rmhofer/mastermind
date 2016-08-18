@@ -3,6 +3,9 @@
 
 ### Download
 
+Newest Release in directory:
+- mastermind/dist/mastermind_v0.2.zip
+
 Download file mmind_app.app from http://www.mit.edu/~mhofer/mmind/mastermind.zip
 
 
