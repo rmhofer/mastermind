@@ -9,6 +9,16 @@ import wx
 import wx.grid as gridlib
 import numpy as np
 import mastermind
+import os
+
+""" The following code snippet corrects filepaths """
+app = True
+filename, filetype = ([x.strip() 
+    for x in os.path.basename(__file__).split('.')])
+if app==True:
+    path = filename+".app/Contents/MacOS/"
+else:
+    path = ""
 
 ########################################################################
 class StartPanel(wx.Panel):
@@ -16,19 +26,21 @@ class StartPanel(wx.Panel):
         Panel class for the start panel that is displayed first
         upon opening the game
     """
-
     #----------------------------------------------------------------------
     def __init__(self, parent):
         """ Constructor creates the panel and displays some text """
         wx.Panel.__init__(self, parent=parent)
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        newGameTxt = wx.StaticText(self, label="Welcome to Mastermind!" \
-            " Click 'New' to Start New Game")
+        label = "Filename: %s Type: %s\n\n" % (filename, filetype)
+        label += "Working Dir:\n%s\n\n" % str(os.getcwd())
+        label += "Data path:\n%s\n\n" % path
+        label += "Welcome to Mastermind! Click 'New' to Start New Game"
+        newGameTxt = wx.StaticText(self, label=label)
         mainSizer.Add(newGameTxt, flag=wx.LEFT|wx.TOP, border=10)
         mainSizer.Add((-1, 10))
         self.SetSizer(mainSizer)
 
-        
+
 ########################################################################
 class NewGame(wx.Panel):
     """ New game panel to set up a new mastermind game """
@@ -38,7 +50,7 @@ class NewGame(wx.Panel):
         """Constructor"""
         wx.Panel.__init__(self, parent=parent)
 
-        png = wx.Image('img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        png = wx.Image(path+'img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         font = wx.Font(pointSize=16, weight=wx.BOLD, style=wx.NORMAL,
             family=wx.SYS_SYSTEM_FONT)
 
@@ -65,7 +77,7 @@ class NewGame(wx.Panel):
             style=wx.TE_PROCESS_ENTER, value='0') 
             for i in np.arange(nPegs)]
         pegtl = [wx.StaticBitmap(self, -1, 
-            wx.Image('img/%d.png' % i, wx.BITMAP_TYPE_ANY).ConvertToBitmap(), 
+            wx.Image(path+'img/%d.png' % i, wx.BITMAP_TYPE_ANY).ConvertToBitmap(), 
             size=(png.GetWidth(), png.GetHeight())) 
             for i in np.arange(nPegs)]
         fgs.AddMany(np.array([pegtl, self.pegtc]).flatten())
@@ -162,9 +174,9 @@ class PlayGame(wx.Panel):
         mainSizer.Add((-1, 10))
 
         #-------- load images
-        self.black_token = wx.Image('img/b.png', 
+        self.black_token = wx.Image(path+'img/b.png', 
             wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        self.white_token =wx.Image('img/w.png', 
+        self.white_token =wx.Image(path+'img/w.png', 
             wx.BITMAP_TYPE_ANY).ConvertToBitmap()
 
         #-------- initialize stats window
@@ -173,7 +185,7 @@ class PlayGame(wx.Panel):
 
         #-------- main game panel
         contentSizer = wx.BoxSizer(wx.HORIZONTAL)
-        bgrd = wx.Image('img/h.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        bgrd = wx.Image(path+'img/h.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         fgs = wx.FlexGridSizer(self.game.maxguess, 
             int(self.game.codelength), 6, 6)
 
@@ -193,7 +205,7 @@ class PlayGame(wx.Panel):
         #-------- feedback panel
         fbgrid = wx.FlexGridSizer(self.game.maxguess, 
             self.game.codelength, 16, 6)
-        fbo = wx.Image('img/o.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        fbo = wx.Image(path+'img/o.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         self.fbs = [wx.StaticBitmap(self, -1, 
             fbo, size=(fbo.GetWidth(), fbo.GetHeight())) 
             for i in np.arange(self.game.maxguess*self.game.codelength)]
@@ -212,10 +224,10 @@ class PlayGame(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.MakeGuess, guessbtn)
 
         #-------- pegbox
-        png = wx.Image('img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        png = wx.Image(path+'img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         pegbox = wx.FlexGridSizer(1, self.game.Ncolors, 5, 5)
         
-        self.pegtl = [self.Marble(self, id=i, bitmap=wx.Image('img/%d.png' % 
+        self.pegtl = [self.Marble(self, id=i, bitmap=wx.Image(path+'img/%d.png' % 
             self.colorIDX[i], wx.BITMAP_TYPE_ANY).ConvertToBitmap()) 
                 for i in np.arange(self.game.Ncolors)]  
         pegbox.AddMany(self.pegtl)
@@ -250,7 +262,7 @@ class PlayGame(wx.Panel):
             self.current_guess = self.agent.compute_guess() #get computer guess
             print self.current_guess
             for i, idx in enumerate(self.get_active_zones()[0]):
-                img = wx.Image('img/%d.png' % 
+                img = wx.Image(path+'img/%d.png' % 
                     self.colorIDX[self.current_guess[i]-1], 
                     wx.BITMAP_TYPE_ANY).ConvertToBitmap()
                 self.pegsbgrd[idx].SetBitmap(img)
@@ -292,7 +304,7 @@ class PlayGame(wx.Panel):
     #----------------------------------------------------------------------
     class Marble(wx.StaticBitmap):
         def __init__(self, *args, **kwargs):
-            png = wx.Image('img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+            png = wx.Image(path+'img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
             kwargs['size'] = (png.GetWidth(), png.GetHeight())
             wx.StaticBitmap.__init__(self, *args, **kwargs)
             self.codeid = kwargs['id']
@@ -326,7 +338,7 @@ class PlayGame(wx.Panel):
             idxs, zones = self.parent.get_active_zones()
             for i, target in enumerate(zones):
                 if self.same_position(pos, target):
-                    img = wx.Image('img/%d.png' % 
+                    img = wx.Image(path+'img/%d.png' % 
                         self.parent.colorIDX[self.codeid], 
                         wx.BITMAP_TYPE_ANY).ConvertToBitmap()
                     self.parent.pegsbgrd[idxs[i]].SetBitmap(img)
@@ -379,7 +391,7 @@ class StatsApp(wx.Frame):
             posSizer.Add(posText, flag=wx.LEFT, border=50)
 
             #-------- pegbox
-            png = wx.Image('img/h.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+            png = wx.Image(path+'img/h.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
             posGrid = wx.FlexGridSizer(Ncolors+1, codelength+1, 5, 5)            
             self.posCont = np.empty(shape=(Ncolors+1, codelength+1), 
                 dtype=object)
@@ -393,7 +405,7 @@ class StatsApp(wx.Frame):
                 png, size=(png.GetWidth(), png.GetHeight()))
             for i in np.arange(Ncolors):
                 self.posCont[i+1][0].Hide()
-                img = wx.Image('img/%d.png' % self.parent.gamePanel.colorIDX[i], 
+                img = wx.Image(path+'img/%d.png' % self.parent.gamePanel.colorIDX[i], 
                         wx.BITMAP_TYPE_ANY).ConvertToBitmap()
                 self.posCont[i+1][0] = wx.StaticBitmap(self, -1, 
                 img, size=(img.GetWidth(), img.GetHeight()))
@@ -435,7 +447,7 @@ class StatsApp(wx.Frame):
             
             for i in np.arange(Ncolors):
                 self.colCont[i+1][0].Hide()
-                img = wx.Image('img/%d.png' % self.parent.gamePanel.colorIDX[i], 
+                img = wx.Image(path+'img/%d.png' % self.parent.gamePanel.colorIDX[i], 
                         wx.BITMAP_TYPE_ANY).ConvertToBitmap()
                 self.colCont[i+1][0] = wx.StaticBitmap(self, -1, 
                 img, size=(img.GetWidth(), img.GetHeight()))
@@ -479,7 +491,7 @@ class StatsApp(wx.Frame):
             topGrid = wx.FlexGridSizer(nTopItems, codelength+1, 5, 5)
             self.topCont = np.empty(shape=(nTopItems, codelength+1), 
                 dtype=object)
-            img = wx.Image('img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+            img = wx.Image(path+'img/0.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
             for index, i in np.ndenumerate(self.topCont):
                 if index[1] == codelength:
                     self.topCont[index] = wx.StaticText(self, label="--")
@@ -564,7 +576,7 @@ class StatsApp(wx.Frame):
             for j in np.arange(itidx[1]-1):
                 self.setPanel.topCont[i][j].Hide()
                 if i < maxidx[0]:
-                    img = wx.Image('img/%d.png' % 
+                    img = wx.Image(path+'img/%d.png' % 
                         self.gamePanel.colorIDX[misc[2][i][j]-1], 
                         wx.BITMAP_TYPE_ANY).ConvertToBitmap()
                     self.setPanel.topCont[i][j].SetBitmap(img)
@@ -574,6 +586,8 @@ class StatsApp(wx.Frame):
                 self.setPanel.topCont[i][-1].SetLabel("%.2f" % misc[3][i])
                 self.setPanel.topCont[i][-1].Show()
         self.Layout()
+
+
 
 ########################################################################
 class MMindApp(wx.Frame):
@@ -595,11 +609,11 @@ class MMindApp(wx.Frame):
         #----------- top toolbar
         self.toolbar = self.CreateToolBar(style=wx.TB_TEXT)
         newtool = self.toolbar.AddLabelTool( wx.ID_ANY, 'New', 
-            wx.Bitmap('icons/stock_new.png'))
+            wx.Bitmap(path+'icons/stock_new.png'))
         statstool = self.toolbar.AddLabelTool( wx.ID_ANY, 'Stats', 
-            wx.Bitmap('icons/stock_save.png'))
+            wx.Bitmap(path+'icons/stock_save.png'))
         quittool = self.toolbar.AddLabelTool( wx.ID_ANY, 'Quit', 
-            wx.Bitmap('icons/stock_exit.png'))
+            wx.Bitmap(path+'icons/stock_exit.png'))
         self.toolbar.Realize()
         self.Bind(wx.EVT_TOOL, self.loadNewGamePanel, newtool)  
         self.Bind(wx.EVT_TOOL, self.toggleStats, statstool)
@@ -614,6 +628,7 @@ class MMindApp(wx.Frame):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.start_panel, 1, wx.EXPAND)
         self.sizer.Add(self.new_game_panel, 1, wx.EXPAND)
+
         self.SetSizer(self.sizer)
         self.Show(True)
 
