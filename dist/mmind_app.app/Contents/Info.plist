@@ -14,7 +14,7 @@
 <key>CFBundleDisplayName</key>
 <string>mmind_app</string>
 <key>CFBundleIconFile</key>
-<string>mm.ico</string>
+<string>mm.icns</string>
 <key>CFBundlePackageType</key>
 <string>APPL</string>
 <key>LSBackgroundOnly</key>
