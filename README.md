@@ -1,6 +1,10 @@
 # Mastermind 
 #### Part of 'Entropy-based Approaches to Mastermind'
 
+### Download
+
+Download file mmind_app.app from http://www.mit.edu/~mhofer/mmind/
+
 
 ### Short project description 
 
