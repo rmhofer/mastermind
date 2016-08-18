@@ -488,6 +488,8 @@ class AppAgent():
 		#chose guess at random from set of max info gain guesses
 		if cs.shape[0] > 1:
 			return cs[np.random.randint(cs.shape[0])]
+		if cs.shape[0] == 1 and cs.ndim == 2:
+			return cs[0]
 		else:
 			return cs
 		
