@@ -3,7 +3,7 @@
 
 ### Download
 
-Download file mmind_app.app from http://www.mit.edu/~mhofer/mmind/
+Download file mmind_app.app from http://www.mit.edu/~mhofer/mmind/mastermind.zip
 
 
 ### Short project description 
