@@ -2,6 +2,7 @@
 import numpy as np
 
 def sm_entropy(prob, t, r):
+	# print t, r
 	"""
 		function to compute Sharma-Mittal entropy
 		for any probability distribution 'prob' 

@@ -279,36 +279,45 @@ class Game:
 		"""
 		if logging: print "\n### Evaluating combination: ", target
 		collected_responses = []
-		if self.codelength == 2: f_len = self.codelength**2 + 1
-		else: f_len = self.codelength**2
-		probabilities = np.zeros(f_len)
+		if self.codelength == 2: n_responses = self.codelength**2 + 1
+		else: n_responses = self.codelength**2
+		prob_of_response = np.zeros(n_responses) 
+		
+		'''
+		compute feedback for each combination in the feasible set
+		'''
 		for combination in feasible_set:
 			response = self.response(target, combination)
 			probability = self.get_probability(combination)
-			if response not in collected_responses:
+			if response not in collected_responses: #add to responses
 				collected_responses.append(response)
 			idx = np.where(np.array(collected_responses)==response)[0]
-			probabilities[idx] += probability
-		probabilities = (probabilities[:len(collected_responses)] 
-			/ np.sum(probabilities))
+			prob_of_response[idx] += probability
+		prob_of_response = np.array((prob_of_response[:len(collected_responses)] 
+			/ np.sum(prob_of_response)))
 		collected_responses = np.array(collected_responses)
-
-		prior_entropy = self.fs_entropy(feasible_set, t, r)
-
-		p_f_sets = []
+		
+		'''
+		compute prior entropy (before guess)
+		'''
+		self.getCurrentFS()
+		fs, fs_prob, _ = self.currentFS
+		prior_entropy = sharma_mittal.sm_entropy(fs_prob, t=t, r=r) 
+		'''
+		compute hypothetical feasible sets for all possible responses
+		'''
+		entropy_of_sets = []
 		for response in collected_responses:
-			f_rc = []
+			f_rc = [] #construct hypothetical feasible set
 			if logging:  print "\n -> when response is: ", response
-			for combination in feasible_set:
+			for combination, c_prob in zip(fs, fs_prob):
 				if (self.response(combination, target) == response):
-					f_rc.append(combination)
-			tmp = np.array([self.get_probability(c) for c in f_rc])
-			tmp /= np.sum(tmp)
-			if logging: print tmp
-			tmp =  sharma_mittal.sm_entropy(tmp, t=t, r=r)
-			p_f_sets.append(tmp)
-		p_f_sets = np.array(p_f_sets)
-		exp_post_entropy = np.sum(np.multiply(p_f_sets, probabilities))
+					f_rc.append(c_prob)
+			f_rc /= np.sum(f_rc)
+			if logging: print tmf_rcp 
+			entropy_of_sets.append(sharma_mittal.sm_entropy(f_rc, t=t, r=r))
+		entropy_of_sets = np.array(entropy_of_sets)
+		exp_post_entropy = np.sum(np.multiply(entropy_of_sets, prob_of_response))
 		return prior_entropy - exp_post_entropy
 
 	#----------------------------------------------------------------------
@@ -325,6 +334,7 @@ class Game:
 		idx = np.argwhere(abs(evaluations - 
 			np.amax(evaluations)) <= 1e-10)
 
+		print evaluations
 		queries = self.codepool[idx.flatten()]
 		if self.logging:
 			print "\t --> u(best query for oder[r]=%s, degree[t]=%s): %.4f" % (
@@ -482,10 +492,11 @@ class AppAgent():
 	#----------------------------------------------------------------------
 	def pure_information_gain(self):
 		self.game.getCurrentFS()
-		cs = self.game.best_combination(self.game.currentFS[0], t=self.t, r=self.r)
+		cs = self.game.best_combination(self.game.currentFS[0], 
+			t=self.t, r=self.r)
 		
 		if len(self.game.currentFS[0]) == 1:
-			print self.game.currentFS[0][0]
+			# print self.game.currentFS[0][0]
 			return self.game.currentFS[0][0]
 		#chose guess at random from set of max info gain guesses
 		if cs.shape[0] > 1:
@@ -518,12 +529,16 @@ class AppAgent():
 ########################
 # # CODE FOR TESTING
 # ######################
-# game = Game(codelength=2, codejar=[128,64,32,16,8,4,2,1], logging=True)
+# np.random.seed(1234)
+# game = Game(codelength=3, codejar=[500,100,1], logging=True)
 # game.initialize()
 # game.guess(combination = [1,3,2])
-
-# agent = AppAgent(game=game, mode=3, r=0.2, t=0.2)
+# r, t = 200, 2
+# print game.evaluate_combination([2,2,3], game.currentFS[0], t=t, r=r, logging=False)
+# agent = AppAgent(game=game, mode=3, r=r, t=t)
 # agent.play()
+
+
 
 # guess = agent.compute_guess()
 # game.guess(combination=guess)

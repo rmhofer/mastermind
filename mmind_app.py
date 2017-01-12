@@ -12,13 +12,14 @@ import mastermind
 import os
 
 """ The following code snippet corrects filepaths """
-app = True
+app = False
 filename, filetype = ([x.strip() 
     for x in os.path.basename(__file__).split('.')])
 if app==True:
     path = filename+".app/Contents/MacOS/"
 else:
     path = ""
+np.random.seed(1234)
 
 ########################################################################
 class StartPanel(wx.Panel):
