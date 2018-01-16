@@ -5,7 +5,7 @@
     and watch the computer play various strategies.
 """
 
-import wx
+import wxm
 import wx.grid as gridlib
 import numpy as np
 import mastermind

@@ -6,7 +6,7 @@ Usage:
     % python setup.py py2app
 """
 
-import macholib_patch
+# import macholib_patch
 from distutils.core import setup
 import py2app
 from glob import glob
